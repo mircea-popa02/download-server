@@ -26,18 +26,23 @@ const upload = multer({ storage });
 
 // File upload endpoint
 app.post('/upload', upload.single('file'), (req, res) => {
-	// exec child process
-	// "sudo", "apt-get", "install", "deluged", "deluge-web", "deluge-console", ";"
-
 
 	const file = `uploads/${req.file.originalname}`;
-	const { spawnSync } = require('child_process');
-	let child = spawnSync("wsl", ["sudo", "pkill", "-i", "deluged", ";", "deluged", ";", "deluge-console", "add", file, ";", "deluge-console", "info"], {
-		shell: true
+
+	const { exec } = require('child_process');
+	exec("sudo pkill -i deluged && deluged && deluge-console add " + file, (error, stdout, stderr) => {
+		if (error) {
+			console.log(`error: ${error.message}`);
+			return;
+		}
+		if (stderr) {
+			console.log(`stderr: ${stderr}`);
+			return;
+		}
+
+		console.log(`stdout: ${stdout}`);
 	});
-	
-	console.log(child.stdout.toString());
-	console.log(child.stderr.toString());
+
 
 	res.json({ file: req.file });
 
