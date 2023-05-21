@@ -2,15 +2,11 @@ const express = require('express');
 const multer = require('multer');
 const app = express();
 const port = 5000;
-const ip = '192.168.0.190';
+const ip = '192.168.0.138';
 
 // allow cross origin requests
 const cors = require('cors');
 app.use(cors());
-
-
-
-
 
 // Set up storage for file uploads
 const storage = multer.diskStorage({
@@ -46,6 +42,23 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
 	res.json({ file: req.file });
 
+});
+
+app.get("/info", (req, res) => {
+	const { exec } = require('child_process');
+	exec("deluge-console info", (error, stdout, stderr) => {
+		if (error) {
+			console.log(`error: ${error.message}`);
+			return;
+		}
+		if (stderr) {
+			console.log(`stderr: ${stderr}`);
+			return;
+		}
+
+		console.log(`stdout: ${stdout}`);
+		res.json({ info: stdout });
+	});
 });
 
 // File download endpoint
